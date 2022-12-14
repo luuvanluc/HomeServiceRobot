@@ -68,6 +68,8 @@ public:
     mMarker.color.g = 1.0f;
     mMarker.color.b = 0.0f;
     mMarker.color.a = 1.0;
+    
+    status = VISIBLE;
 
     mMarker.lifetime = ros::Duration();
   }
@@ -95,12 +97,14 @@ public:
 
   void hide(void)
   {
+    status = INVISIBLE;
     mMarker.color.a = 0.0;
     mPub.publish(mMarker);
   }
 
   void display(void)
   {
+    status = VISIBLE;
     mMarker.color.a = 1.0;
     mPub.publish(mMarker);
   }
@@ -121,6 +125,7 @@ public:
 
 
 private:
+  enum STATUS {INVISIBLE, VISIBLE};
   static int mId;
   visualization_msgs::Marker mMarker;
   ros::NodeHandle mNode;
@@ -128,13 +133,49 @@ private:
   ros::Subscriber mSub;
   geometry_msgs::Point mPickUpPos;
   geometry_msgs::Point mDropOffPos;
+  STATUS status;
 
   void callback(const geometry_msgs::PoseWithCovarianceStamped& data)
   {
     double x = data.pose.pose.position.x;
     double y = data.pose.pose.position.y;
     double z = data.pose.pose.position.z;
-    ROS_INFO("x = %.3lf, y = %.3lf, z = %.3lf",x,y,z);
+    //ROS_INFO("x = %.3lf, y = %.3lf, z = %.3lf",x,y,z);
+    double d1 = calculateDistanceToPickUpPos(x, y, z);
+    double d2 = calculateDistanceToDropOffPos(x, y, z);
+
+    ROS_INFO("d1 = %.3lf, d2 = %.3lf",d1,d2);
+
+    if ((d1 < 0.2) && (status == VISIBLE))
+    {
+      ROS_INFO("PICK UP BOX");
+      hide();
+    }
+    
+    if ((d2 < 0.2) && (status == INVISIBLE))
+    {
+      ROS_INFO("DROP OFF BOX");
+      setPosition(mDropOffPos.x, mDropOffPos.y, mDropOffPos.z);
+      display();
+    }
+  }
+
+  double calculateDistanceToPickUpPos(double curRobotPosX, double curRobotPosY, double curRobotPosZ)
+  {
+    double dX = mPickUpPos.x - curRobotPosX;
+    double dY = mPickUpPos.y - curRobotPosY;
+    double dZ = mPickUpPos.z - curRobotPosZ;
+    double d = sqrt(dX*dX + dY*dY + dZ*dZ);
+    return d;
+  }
+
+  double calculateDistanceToDropOffPos(double curRobotPosX, double curRobotPosY, double curRobotPosZ)
+  {
+    double dX = mDropOffPos.x - curRobotPosX;
+    double dY = mDropOffPos.y - curRobotPosY;
+    double dZ = mDropOffPos.z - curRobotPosZ;
+    double d = sqrt(dX*dX + dY*dY + dZ*dZ);
+    return d;
   }
 
 };
@@ -144,27 +185,19 @@ int main( int argc, char** argv )
 {
   ros::init(argc, argv, "add_markers");
 
-  CubeMarker cube1;
-  cube1.setSize(0.5,0.5,0.5);
+  double PickUpPos[3] = {3, 5, 0};
+  double DropOffPos[3] = {11, 4, 0};
+  CubeMarker cube;
+  ros::Duration(4.0).sleep();
+  cube.setSize(0.2,0.2,0.2);
+  
+  // Set Pick-up and Drop-off position for cube
+  cube.setPickUpPosition(PickUpPos[0], PickUpPos[1], PickUpPos[2]);
+  cube.setDropOffPosition(DropOffPos[0], DropOffPos[1], DropOffPos[2]);
 
-//  ros::Duration(5.0).sleep();
-/*
-  while(ros::ok())
-  {
-    cube1.setPosition(3.0,5.0,0.1);
-    cube1.display(); ROS_INFO("yyy");
-    ros::Duration(5.0).sleep();
-    cube1.hide();
-
-
-    ros::Duration(5.0).sleep();
-
-    cube1.setPosition(11.0,4.0,0.1);
-    cube1.display(); ROS_INFO("zzz");
-    ros::Duration(5.0).sleep();
-    cube1.hide();
-  }
-*/
+  // Set Cube position at Pick-up Position
+  cube.setPosition(PickUpPos[0], PickUpPos[1], PickUpPos[2]);
+  cube.display();
 
   // Handle ROS communication events
   ros::spin();

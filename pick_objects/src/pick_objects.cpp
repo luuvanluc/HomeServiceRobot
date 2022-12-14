@@ -18,18 +18,19 @@ int main(int argc, char** argv){
   }
 
   move_base_msgs::MoveBaseGoal goal;
-
+  double PickUpPos[3] = {3, 5, 0};
+  double DropOffPos[3] = {11, 4, 0};
   // set up the frame parameters
   goal.target_pose.header.frame_id = "map";
   goal.target_pose.header.stamp = ros::Time::now();
 
   // Define a position and orientation for the robot to reach
-  goal.target_pose.pose.position.x = 3.0;
-  goal.target_pose.pose.position.y = 5.0;
+  goal.target_pose.pose.position.x = PickUpPos[0];
+  goal.target_pose.pose.position.y = PickUpPos[1];
   goal.target_pose.pose.orientation.w = 1.57;
 
    // Send the goal position and orientation for the robot to reach
-  ROS_INFO("Sending the FIRST goal");
+  ROS_INFO("Sending the FIRST goal - PICK-UP POSITION");
   ac.sendGoal(goal);
 
   // Wait an infinite time for the results
@@ -44,21 +45,13 @@ int main(int argc, char** argv){
   // Wait 5 seconds
   ros::Duration(5.0).sleep();
 
-
-
-  //move_base_msgs::MoveBaseGoal goal2;
-
-  // set up the frame parameters
-  //goal2.target_pose.header.frame_id = "map";
-  //goal2.target_pose.header.stamp = ros::Time::now();
-
   // Define a position and orientation for the robot to reach
-  goal.target_pose.pose.position.x = 11.0;
-  goal.target_pose.pose.position.y = 4.0;
+  goal.target_pose.pose.position.x = DropOffPos[0];
+  goal.target_pose.pose.position.y = DropOffPos[1];
   goal.target_pose.pose.orientation.w = 1.57;
 
    // Send the goal position and orientation for the robot to reach
-  ROS_INFO("Sending the SECOND goal");
+  ROS_INFO("Sending the SECOND goal - DROP-OFF POSITION");
   ac.sendGoal(goal);
 
   // Wait an infinite time for the results
