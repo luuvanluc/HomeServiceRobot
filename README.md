@@ -1,12 +1,18 @@
 # Home Service Robot
 Home Service Robot is the final project in the Nanodegree Program.
+
 A robot will move to a pick-up position for picking up a green cube box and simulate carrying the box to a drop-off position and drops it
 
 ## Description
-
+This project uses the Official  ROS packages: [gmapping](http://wiki.ros.org/gmapping), 
+[turtlebot_teleop](http://wiki.ros.org/turtlebot_teleop),
+[turtlebot_rviz_launchers](http://wiki.ros.org/turtlebot_rviz_launchers) 
+and [turtlebot_gazebo](http://wiki.ros.org/turtlebot_gazebo).
 
 ## Prerequisites
-
+- ROS (Melodic or Kinetic), Gazebo on Linux
+- CMake & g++/gcc
+- Install xterm `sudo apt-get install xterm`
 
 ## Build and Launch
 ### 1. Build
